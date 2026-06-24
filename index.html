@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>物理实验仿真平台</title>
+    <link rel="stylesheet" href="css/style.css?v=2">
+</head>
+<body>
+    <div id="app">
+        <!-- 侧边栏 -->
+        <aside id="sidebar">
+            <div class="sidebar-header">
+                <h1><span class="brand-icon">実</span> 物理实验室</h1>
+                <p class="subtitle">— 交互式物理仿真平台 —</p>
+            </div>
+            <nav id="category-nav">
+                <div class="category open" data-category="mechanics">
+                    <div class="category-header">
+                        <span class="manga-icon">力</span>
+                        <span>力学</span>
+                        <span class="arrow">&#12297;</span>
+                    </div>
+                    <ul class="experiment-list">
+                        <li data-exp="newton-laws">牛顿定律</li>
+                        <li data-exp="projectile">平抛与斜抛</li>
+                        <li data-exp="free-fall">自由落体运动</li>
+                        <li data-exp="collision">双小球刚体碰撞</li>
+                        <li data-exp="double-pendulum">双摆混沌运动</li>
+                        <li data-exp="three-body">三体运动</li>
+                        <li data-exp="newton-cradle">牛顿摆</li>
+                    </ul>
+                </div>
+                <div class="category" data-category="electromagnetism">
+                    <div class="category-header">
+                        <span class="manga-icon">磁</span>
+                        <span>电磁学</span>
+                        <span class="arrow">&#12297;</span>
+                    </div>
+                    <ul class="experiment-list">
+                        <li data-exp="rc-circuit">RC电路</li>
+                        <li data-exp="charge-magnetic">磁场中的电荷</li>
+                        <li data-exp="charged-particle-fields">带电粒子在复合场中运动</li>
+                        <li data-exp="electromagnetic-induction">电磁感应</li>
+                        <li data-exp="volt-ampere">伏安法测电阻</li>
+                    </ul>
+                </div>
+                <div class="category" data-category="optics">
+                    <div class="category-header">
+                        <span class="manga-icon">光</span>
+                        <span>光学</span>
+                        <span class="arrow">&#12297;</span>
+                    </div>
+                    <ul class="experiment-list">
+                        <li data-exp="lens">凸透镜成像</li>
+                        <li data-exp="refraction">光的折射与全反射</li>
+                        <li data-exp="double-slit">双缝干涉</li>
+                        <li data-exp="interference-diffraction">干涉衍射</li>
+                        <li data-exp="color-mixing">色光混合实验</li>
+                    </ul>
+                </div>
+                <div class="category" data-category="thermodynamics">
+                    <div class="category-header">
+                        <span class="manga-icon">熱</span>
+                        <span>热学</span>
+                        <span class="arrow">&#12297;</span>
+                    </div>
+                    <ul class="experiment-list">
+                        <li data-exp="ideal-gas">理想气体状态方程</li>
+                        <li data-exp="buoyancy">浮力与沉降速度</li>
+                    </ul>
+                </div>
+                <div class="category" data-category="waves">
+                    <div class="category-header">
+                        <span class="manga-icon">波</span>
+                        <span>波与振动</span>
+                        <span class="arrow">&#12297;</span>
+                    </div>
+                    <ul class="experiment-list">
+                        <li data-exp="pendulum">单摆运动</li>
+                        <li data-exp="shm">简谐运动</li>
+                        <li data-exp="spring">弹簧振子</li>
+                        <li data-exp="standing-wave">驻波</li>
+                        <li data-exp="doppler">多普勒效应</li>
+                    </ul>
+                </div>
+                <div class="category" data-category="modern">
+                    <div class="category-header">
+                        <span class="manga-icon">量</span>
+                        <span>近代物理</span>
+                        <span class="arrow">&#12297;</span>
+                    </div>
+                    <ul class="experiment-list">
+                        <li data-exp="photoelectric">光电效应</li>
+                    </ul>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="ai-btn" class="ai-btn">
+                    <span class="manga-icon-sm">?</span> AI 问答
+                </button>
+            </div>
+        </aside>
+
+        <!-- 主内容区域 -->
+        <main id="main-content">
+            <!-- 欢迎页面 -->
+            <div id="welcome-page" class="page active">
+                <div class="welcome-content">
+                    <h1>欢迎来到物理实验室</h1>
+                    <p>选择左侧的实验开始探索物理世界的奥秘</p>
+                    <div style="text-align:center;margin:16px 0;">
+                        <button id="welcome-ai-btn" class="btn-ai-start" onclick="App.showPage('ai-page')">
+                            <span style="font-size:20px;">?</span> AI 物理问答
+                        </button>
+                    </div>
+                    <div class="welcome-categories">
+                        <div class="welcome-card" data-category="mechanics">
+                            <span class="manga-icon manga-icon-lg">力</span>
+                            <h3>力学</h3>
+                            <p>7个实验 · 运动与力</p>
+                        </div>
+                        <div class="welcome-card" data-category="electromagnetism">
+                            <span class="manga-icon manga-icon-lg">磁</span>
+                            <h3>电磁学</h3>
+                            <p>5个实验 · 电与磁</p>
+                        </div>
+                        <div class="welcome-card" data-category="optics">
+                            <span class="manga-icon manga-icon-lg">光</span>
+                            <h3>光学</h3>
+                            <p>5个实验 · 光与色彩</p>
+                        </div>
+                        <div class="welcome-card" data-category="thermodynamics">
+                            <span class="manga-icon manga-icon-lg">熱</span>
+                            <h3>热学</h3>
+                            <p>2个实验 · 热与流体</p>
+                        </div>
+                        <div class="welcome-card" data-category="waves">
+                            <span class="manga-icon manga-icon-lg">波</span>
+                            <h3>波与振动</h3>
+                            <p>5个实验 · 波动与振动</p>
+                        </div>
+                        <div class="welcome-card" data-category="modern">
+                            <span class="manga-icon manga-icon-lg">量</span>
+                            <h3>近代物理</h3>
+                            <p>1个实验 · 量子与光子</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 实验页面容器 -->
+            <div id="experiment-container" class="page">
+                <div id="exp-header">
+                    <h2 id="exp-title">实验标题</h2>
+                    <p id="exp-description">实验描述</p>
+                </div>
+                <div id="exp-body">
+                    <div id="exp-canvas-container">
+                        <canvas id="exp-canvas"></canvas>
+                    </div>
+                    <div id="exp-controls">
+                        <h3>参数控制</h3>
+                        <div id="controls-container"></div>
+                        <div class="control-buttons">
+                            <button id="btn-reset" class="btn btn-reset">重置</button>
+                            <button id="btn-pause" class="btn btn-pause">暂停</button>
+                        </div>
+                        <div id="exp-info">
+                            <h3>实验信息</h3>
+                            <div id="info-container"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI 问答页面 -->
+            <div id="ai-page" class="page">
+                <div class="ai-header">
+                    <h2><span class="manga-icon-sm">?</span> AI 物理助手</h2>
+                    <p>由 DeepSeek AI 驱动，回答你的物理问题</p>
+                </div>
+                <div id="ai-chat-container">
+                    <div id="ai-config-area">
+                        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                            <input type="password" id="ai-api-key-input" placeholder="在此粘贴 DeepSeek API 密钥 (sk-...)" style="flex:1;min-width:200px;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:monospace;">
+                            <button id="ai-save-key-btn" class="btn btn-primary" style="flex:none;padding:8px 16px;font-size:13px;">保存密钥</button>
+                        </div>
+                        <div id="ai-api-status" style="font-size:11px;color:#999;margin-top:4px;">未配置 API 密钥，请输入上方密钥后开始提问</div>
+                    </div>
+                    <div id="ai-messages">
+                        <div class="message ai">
+                            <div class="message-content">
+                                你好！我是AI物理助手。你可以问我任何物理问题，我会尽力帮你解答！
+                            </div>
+                        </div>
+                    </div>
+                    <div id="ai-input-area">
+                        <textarea id="ai-input" placeholder="输入你的物理问题..." rows="2"></textarea>
+                        <button id="ai-send" class="btn btn-primary">发送</button>
+                    </div>
+                    <div class="ai-status">
+                        <span id="ai-status-text">配置 API 密钥后即可开始提问</span>
+                        <button id="ai-clear-btn" class="btn-text">清空对话</button>
+                    </div>
+                </div>
+        </main>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/utils/physics.js?v=2"></script>
+    <script src="js/utils/deepseek.js?v=2"></script>
+    <script src="js/experiments/pendulum.js"></script>
+    <script src="js/experiments/projectile.js"></script>
+    <script src="js/experiments/spring.js"></script>
+    <script src="js/experiments/newton-cradle.js"></script>
+    <script src="js/experiments/rc-circuit.js"></script>
+    <script src="js/experiments/charge-magnetic.js"></script>
+    <script src="js/experiments/lens.js"></script>
+    <script src="js/experiments/refraction.js"></script>
+    <script src="js/experiments/double-slit.js"></script>
+    <script src="js/experiments/photoelectric.js"></script>
+    <script src="js/experiments/standing-wave.js"></script>
+    <script src="js/experiments/doppler.js"></script>
+    <script src="js/experiments/ideal-gas.js"></script>
+    <script src="js/experiments/interference-diffraction.js"></script>
+    <script src="js/experiments/newton-laws.js"></script>
+    <script src="js/experiments/collision.js"></script>
+    <script src="js/experiments/double-pendulum.js"></script>
+    <script src="js/experiments/electromagnetic-induction.js"></script>
+    <script src="js/experiments/free-fall.js"></script>
+    <script src="js/experiments/color-mixing.js"></script>
+    <script src="js/experiments/three-body.js"></script>
+    <script src="js/experiments/charged-particle-fields.js"></script>
+    <script src="js/experiments/buoyancy.js"></script>
+    <script src="js/experiments/volt-ampere.js"></script>
+    <script src="js/experiments/shm.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,48 +1,24 @@
 /**
  * 物理实验仿真平台 - 主入口
- * 负责实验切换、事件绑定、UI控制
+ * 首页作为导航中心 + AI 问答
  */
 
 const App = {
-    currentExp: null,
-    experiments: {},
-    canvas: null,
-    ctx: null,
-    controlsEl: null,
-    infoEl: null,
-
-    register: function(experiment) {
-        this.experiments[experiment.id] = experiment;
-    },
 
     init: function() {
-        this.canvas = document.getElementById('exp-canvas');
-        this.ctx = this.canvas ? this.canvas.getContext('2d') : null;
-        this.controlsEl = document.getElementById('controls-container');
-        this.infoEl = document.getElementById('info-container');
-
         this.setupNavigation();
         this.setupAI();
-        this.setupResize();
     },
 
     // 侧边栏导航
     setupNavigation: function() {
         // 分类折叠
         document.querySelectorAll('.category-header').forEach(header => {
-            header.addEventListener('click', () => {
-                const category = header.parentElement;
-                category.classList.toggle('open');
-            });
-        });
-
-        // 实验选择 - SPA方式加载
-        document.querySelectorAll('.experiment-list li').forEach(item => {
-            item.addEventListener('click', (e) => {
-                const expId = item.dataset.exp;
-                if (expId) {
-                    e.preventDefault();
-                    this.loadExperiment(expId);
+            header.addEventListener('click', (e) => {
+                // 如果点击的是分类折叠区域（不是里面的链接）
+                if (e.target.closest('.category-header')) {
+                    const category = header.parentElement;
+                    category.classList.toggle('open');
                 }
             });
         });
@@ -50,7 +26,6 @@ const App = {
         // AI按钮
         document.getElementById('ai-btn').addEventListener('click', () => {
             this.showPage('ai-page');
-            document.querySelectorAll('.experiment-list li').forEach(el => el.classList.remove('active'));
         });
 
         // 欢迎页 AI 按钮
@@ -62,58 +37,11 @@ const App = {
         }
     },
 
-    // 加载实验（SPA方式）
-    loadExperiment: function(expId) {
-        const exp = this.experiments[expId];
-        if (!exp) {
-            console.warn('实验 "' + expId + '" 未找到，尝试跳转独立页面');
-            window.location.href = 'experiments/' + expId + '.html';
-            return;
-        }
-
-        if (this.currentExp) {
-            if (this.currentExp.animId) {
-                cancelAnimationFrame(this.currentExp.animId);
-                this.currentExp.animId = null;
-            }
-            this.currentExp.state.isRunning = false;
-        }
-
-        this.currentExp = exp;
-
-        document.getElementById('exp-title').textContent = exp.title;
-        document.getElementById('exp-description').textContent = exp.description || '';
-        document.getElementById('btn-pause').style.display = '';
-
-        this.showPage('experiment-container');
-
-        document.querySelectorAll('.experiment-list li').forEach(el => el.classList.remove('active'));
-        const navItem = document.querySelector('.experiment-list li[data-exp="' + expId + '"]');
-        if (navItem) {
-            navItem.classList.add('active');
-            const category = navItem.closest('.category');
-            if (category) category.classList.add('open');
-        }
-
-        exp.init(this.canvas, this.controlsEl, this.infoEl);
-    },
-
-    // 页面切换
+    // 页面切换（欢迎页 / AI问答）
     showPage: function(pageId) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         const page = document.getElementById(pageId);
         if (page) page.classList.add('active');
-    },
-
-    // 窗口缩放
-    setupResize: function() {
-        let resizeTimer;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(() => {
-                if (this.currentExp) this.currentExp.resize();
-            }, 200);
-        });
     },
 
     // AI 问答
@@ -212,36 +140,8 @@ const App = {
                 sendMessage();
             }
         });
-    },
-
+    }
 };
-
-// ========== 注册所有实验 ==========
-App.register(PendulumExperiment);
-App.register(ProjectileExperiment);
-App.register(SpringExperiment);
-App.register(NewtonCradleExperiment);
-App.register(RCCircuitExperiment);
-App.register(ChargeMagneticExperiment);
-App.register(LensExperiment);
-App.register(RefractionExperiment);
-App.register(DoubleSlitExperiment);
-App.register(PhotoelectricExperiment);
-App.register(StandingWaveExperiment);
-App.register(DopplerExperiment);
-App.register(IdealGasExperiment);
-App.register(InterferenceDiffractionExperiment);
-App.register(NewtonLawsExperiment);
-App.register(CollisionExperiment);
-App.register(DoublePendulumExperiment);
-App.register(ElectromagneticInductionExperiment);
-App.register(FreeFallExperiment);
-App.register(ColorMixingExperiment);
-App.register(ThreeBodyExperiment);
-App.register(ChargedParticleFieldsExperiment);
-App.register(BuoyancyExperiment);
-App.register(VoltAmpereExperiment);
-App.register(SHMExperiment);
 
 // 启动
 document.addEventListener('DOMContentLoaded', () => {

@@ -12,7 +12,7 @@ const physicsJSPath = '../js/utils/physics.js';
 const deepseekJSPath = '../js/utils/deepseek.js';
 const experimentsJSPath = '../js/experiments';
 
-// 读取所有实验文件，提取 id 和 title
+// 读取所有实验文件，提取 id、title 和变量名
 const files = fs.readdirSync(experimentsDir).filter(f => f.endsWith('.js'));
 
 const experiments = [];
@@ -20,7 +20,8 @@ const experiments = [];
 for (const file of files) {
     const content = fs.readFileSync(path.join(experimentsDir, file), 'utf-8');
 
-    // 用正则提取 id、title、category、description
+    // 提取 const 变量名（例如 PendulumExperiment）
+    const varNameMatch = content.match(/^const\s+(\w+Experiment)\s*=\s*\{/m);
     const idMatch = content.match(/id:\s*'([^']+)'/);
     const titleMatch = content.match(/title:\s*'([^']+)'/);
     const categoryMatch = content.match(/category:\s*'([^']+)'/);
@@ -32,7 +33,8 @@ for (const file of files) {
             title: titleMatch[1],
             category: categoryMatch ? categoryMatch[1] : '',
             description: descMatch ? descMatch[1].replace(/\\\\n/g, ' ').replace(/' \+/g, '').replace(/\s+/g, ' ').trim() : '',
-            file: file
+            file: file,
+            varName: varNameMatch ? varNameMatch[1] : (idMatch[1].replace(/-([a-z])/g, (_, c) => c.toUpperCase()).replace(/^[a-z]/, c => c.toUpperCase()) + 'Experiment')
         });
     }
 }
@@ -165,21 +167,11 @@ function generateExperimentHTML(exp) {
     <!-- 启动实验 -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // 查找实验对象（在各实验文件中定义的全局变量）
-        var expVarName = Object.keys(window).find(function(k) {
-            return k.endsWith('Experiment') && window[k] && window[k].id === '${exp.id}';
-        }) || '${exp.id.charAt(0).toUpperCase() + exp.id.slice(1).replace(/-([a-z])/g, function(_,c){return c.toUpperCase()})}Experiment';
-
-        var exp = window[expVarName];
-        if (!exp) {
-            // 兜底：遍历所有全局对象
-            for (var k in window) {
-                if (window[k] && window[k].id === '${exp.id}') { exp = window[k]; break; }
-            }
-        }
+        // 直接引用实验变量（从 JS 文件中的 const 声明获取）
+        var exp = typeof ${exp.varName} !== 'undefined' ? ${exp.varName} : null;
 
         if (!exp) {
-            document.body.innerHTML = '<h2 style="color:red;padding:40px;">错误：找不到实验对象 "${exp.id}"</h2>';
+            document.body.innerHTML = '<h2 style="color:red;padding:40px;">错误：找不到实验对象 "${exp.id}"（${exp.varName}）</h2>';
             return;
         }
 

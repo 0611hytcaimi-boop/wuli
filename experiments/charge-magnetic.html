@@ -79,21 +79,11 @@
     <!-- 启动实验 -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // 查找实验对象（在各实验文件中定义的全局变量）
-        var expVarName = Object.keys(window).find(function(k) {
-            return k.endsWith('Experiment') && window[k] && window[k].id === 'charge-magnetic';
-        }) || 'ChargeMagneticExperiment';
-
-        var exp = window[expVarName];
-        if (!exp) {
-            // 兜底：遍历所有全局对象
-            for (var k in window) {
-                if (window[k] && window[k].id === 'charge-magnetic') { exp = window[k]; break; }
-            }
-        }
+        // 直接引用实验变量（从 JS 文件中的 const 声明获取）
+        var exp = typeof ChargeMagneticExperiment !== 'undefined' ? ChargeMagneticExperiment : null;
 
         if (!exp) {
-            document.body.innerHTML = '<h2 style="color:red;padding:40px;">错误：找不到实验对象 "charge-magnetic"</h2>';
+            document.body.innerHTML = '<h2 style="color:red;padding:40px;">错误：找不到实验对象 "charge-magnetic"（ChargeMagneticExperiment）</h2>';
             return;
         }
 

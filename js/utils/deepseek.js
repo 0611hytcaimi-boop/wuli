@@ -5,9 +5,9 @@
  */
 
 const DeepSeek = {
-    // API配置 - 用户需替换为自己的API密钥
+    // API配置 - 内置默认密钥，用户也可在页面中替换
     config: {
-        apiKey: localStorage.getItem('deepseek_api_key') || '',
+        apiKey: localStorage.getItem('deepseek_api_key') || 'sk-ad3a7f0a19034ea687db9c97f151771f',
         baseUrl: 'https://api.deepseek.com/v1',
         model: 'deepseek-chat',
         temperature: 0.7,

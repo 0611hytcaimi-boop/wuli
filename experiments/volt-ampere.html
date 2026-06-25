@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>伏安法测电阻 - 物理实验室</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        /* 实验专属页面的微调 */
+        #main-content { width: 100%; }
+        .page.active#experiment-container { display: flex !important; }
+        #exp-header { padding-right: 32px; }
+        body { overflow: hidden; height: 100vh; margin: 0; }
+        /* 顶部导航栏 */
+        .exp-topbar {
+            display: flex; align-items: center; gap: 12px;
+            padding: 8px 16px; background: var(--card-bg);
+            border-bottom: 1px solid var(--border); flex-shrink: 0;
+        }
+        .exp-topbar a {
+            text-decoration: none; color: var(--primary);
+            font-size: 13px; font-weight: 500;
+            display: flex; align-items: center; gap: 4px;
+        }
+        .exp-topbar a:hover { color: var(--primary-dark); }
+        .exp-topbar .exp-title-bar {
+            font-size: 14px; font-weight: 600; color: var(--text);
+            margin-left: 8px;
+        }
+        #exp-description { font-size: 13px; }
+        #controls-container { max-height: calc(100vh - 350px); overflow-y: auto; }
+        html, body { height: 100%; margin: 0; padding: 0; }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- 顶部导航 -->
+        <div class="exp-topbar">
+            <a href="../index.html">&larr; 返回实验室</a>
+            <span class="exp-title-bar">| 伏安法测电阻</span>
+            <a href="../index.html" style="margin-left:auto;font-size:12px;opacity:0.7;">&#8592; 首页</a>
+        </div>
+
+        <!-- 主内容 -->
+        <main id="main-content" style="flex:1;overflow:hidden;">
+            <div id="experiment-container" class="page active" style="display:flex;flex-direction:column;height:100%;">
+                <div id="exp-header">
+                    <h2 id="exp-title">伏安法测电阻</h2>
+                    <p id="exp-description">学习伏安法测电阻的电路连接。电流表串联测量电流，电压表并联测量电压，利用欧姆定律 R=V/I 计算电阻值。</p>
+                </div>
+                <div id="exp-body" style="flex:1;overflow:hidden;">
+                    <div id="exp-canvas-container">
+                        <canvas id="exp-canvas"></canvas>
+                    </div>
+                    <div id="exp-controls">
+                        <h3>参数控制</h3>
+                        <div id="controls-container"></div>
+                        <div class="control-buttons">
+                            <button id="btn-reset" class="btn btn-reset">重置</button>
+                            <button id="btn-pause" class="btn btn-pause">开始</button>
+                        </div>
+                        <div id="exp-info">
+                            <h3>实验信息</h3>
+                            <div id="info-container"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 核心库 -->
+    <script src="../js/utils/physics.js"></script>
+    <script src="../js/utils/deepseek.js"></script>
+
+    <!-- 实验脚本 -->
+    <script src="../js/experiments/volt-ampere.js"></script>
+
+    <!-- 启动实验 -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 查找实验对象（在各实验文件中定义的全局变量）
+        var expVarName = Object.keys(window).find(function(k) {
+            return k.endsWith('Experiment') && window[k] && window[k].id === 'volt-ampere';
+        }) || 'VoltAmpereExperiment';
+
+        var exp = window[expVarName];
+        if (!exp) {
+            // 兜底：遍历所有全局对象
+            for (var k in window) {
+                if (window[k] && window[k].id === 'volt-ampere') { exp = window[k]; break; }
+            }
+        }
+
+        if (!exp) {
+            document.body.innerHTML = '<h2 style="color:red;padding:40px;">错误：找不到实验对象 "volt-ampere"</h2>';
+            return;
+        }
+
+        // 修正 pause 按钮的初始文字（各实验的 reset 里会设置）
+        var btn = document.getElementById('btn-pause');
+
+        // 初始化
+        exp.init(document.getElementById('exp-canvas'),
+                 document.getElementById('controls-container'),
+                 document.getElementById('info-container'));
+
+        // 绑定按钮
+        document.getElementById('btn-reset').addEventListener('click', function() { exp.reset(); });
+        document.getElementById('btn-pause').addEventListener('click', function() { exp.togglePause(); });
+
+        // 窗口缩放时重置画布尺寸
+        var resizeTimer;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function() {
+                if (typeof exp.resize === 'function') {
+                    exp.setupCanvas();
+                    exp.draw();
+                }
+            }, 150);
+        });
+
+        // 初始适配画布
+        setTimeout(function() {
+            exp.setupCanvas();
+            exp.draw();
+        }, 50);
+
+        // 列出所有实验的导航链接
+        var navHTML = '<div style="margin-top:12px;padding:8px;border-top:1px solid var(--border);">' +
+            '<div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px;">其他实验：</div>' +
+            '<div style="display:flex;flex-wrap:wrap;gap:4px;">';
+        var allExps = [
+            { id: 'spring', title: '弹簧振子', cat: 'mechanics' },
+            { id: 'shm', title: '简谐运动', cat: 'mechanics' },
+            { id: 'newton-cradle', title: '牛顿摆', cat: 'mechanics' },
+            { id: 'newton-laws', title: '牛顿定律', cat: 'mechanics' },
+            { id: 'projectile', title: '抛体运动', cat: 'mechanics' },
+            { id: 'three-body', title: '三体运动', cat: 'mechanics' },
+            { id: 'double-pendulum', title: '双摆混沌运动', cat: 'mechanics' },
+            { id: 'collision', title: '双小球刚体碰撞', cat: 'mechanics' },
+            { id: 'free-fall', title: '自由落体运动', cat: 'mechanics' },
+            { id: 'charge-magnetic', title: '磁场中的电荷', cat: 'electromagnetism' },
+            { id: 'charged-particle-fields', title: '带电粒子在电场和重力场中的运动', cat: 'electromagnetism' },
+            { id: 'electromagnetic-induction', title: '电磁感应', cat: 'electromagnetism' },
+            { id: 'volt-ampere', title: '伏安法测电阻', cat: 'electromagnetism' },
+            { id: 'rc-circuit', title: 'RC电路', cat: 'electromagnetism' },
+            { id: 'interference-diffraction', title: '干涉衍射', cat: 'optics' },
+            { id: 'refraction', title: '光的折射', cat: 'optics' },
+            { id: 'color-mixing', title: '色光混合实验', cat: 'optics' },
+            { id: 'double-slit', title: '双缝干涉', cat: 'optics' },
+            { id: 'lens', title: '凸透镜成像', cat: 'optics' },
+            { id: 'buoyancy', title: '浮力与沉降速度', cat: 'thermodynamics' },
+            { id: 'ideal-gas', title: '理想气体状态方程', cat: 'thermodynamics' },
+            { id: 'pendulum', title: '单摆运动', cat: 'waves' },
+            { id: 'doppler', title: '多普勒效应', cat: 'waves' },
+            { id: 'standing-wave', title: '驻波', cat: 'waves' },
+            { id: 'photoelectric', title: '光电效应', cat: 'modern' }
+        ];
+        allExps.forEach(function(e) {
+            if (e.id !== 'volt-ampere') {
+                navHTML += '<a href="' + e.id + '.html" style="font-size:11px;padding:2px 8px;background:var(--bg);border-radius:4px;text-decoration:none;color:var(--text-secondary);">' + e.title + '</a> ';
+            }
+        });
+        navHTML += '</div></div>';
+        document.getElementById('exp-controls').insertAdjacentHTML('beforeend', navHTML);
+    });
+    </script>
+</body>
+</html>

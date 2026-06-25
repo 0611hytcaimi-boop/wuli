@@ -248,6 +248,12 @@ body {
     position: relative;
 }
 
+.experiment-list li a {
+    color: inherit;
+    text-decoration: none;
+    display: block;
+}
+
 .experiment-list li::before {
     content: '';
     position: absolute;

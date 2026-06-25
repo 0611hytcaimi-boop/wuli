@@ -11,20 +11,17 @@ const App = {
     controlsEl: null,
     infoEl: null,
 
-    // 注册所有实验
     register: function(experiment) {
         this.experiments[experiment.id] = experiment;
     },
 
     init: function() {
         this.canvas = document.getElementById('exp-canvas');
-        this.ctx = this.canvas.getContext('2d');
+        this.ctx = this.canvas ? this.canvas.getContext('2d') : null;
         this.controlsEl = document.getElementById('controls-container');
         this.infoEl = document.getElementById('info-container');
 
         this.setupNavigation();
-        this.setupButtons();
-        this.setupWelcomeCards();
         this.setupAI();
         this.setupResize();
     },
@@ -39,11 +36,14 @@ const App = {
             });
         });
 
-        // 实验选择
+        // 实验选择 - SPA方式加载
         document.querySelectorAll('.experiment-list li').forEach(item => {
-            item.addEventListener('click', () => {
+            item.addEventListener('click', (e) => {
                 const expId = item.dataset.exp;
-                this.loadExperiment(expId);
+                if (expId) {
+                    e.preventDefault();
+                    this.loadExperiment(expId);
+                }
             });
         });
 
@@ -53,51 +53,24 @@ const App = {
             document.querySelectorAll('.experiment-list li').forEach(el => el.classList.remove('active'));
         });
 
-        // 欢迎页卡片
-        document.querySelectorAll('.welcome-card').forEach(card => {
-            card.addEventListener('click', () => {
-                const category = card.dataset.category;
-                const firstExp = document.querySelector(`.experiment-list li[data-exp]`);
-                if (firstExp) {
-                    this.loadExperiment(firstExp.dataset.exp);
-                }
+        // 欢迎页 AI 按钮
+        const welcomeAiBtn = document.getElementById('welcome-ai-btn');
+        if (welcomeAiBtn) {
+            welcomeAiBtn.addEventListener('click', () => {
+                this.showPage('ai-page');
             });
-        });
+        }
     },
 
-    // 底部按钮
-    setupButtons: function() {
-        document.getElementById('btn-reset').addEventListener('click', () => {
-            if (this.currentExp) this.currentExp.reset();
-        });
-
-        document.getElementById('btn-pause').addEventListener('click', () => {
-            if (this.currentExp) this.currentExp.togglePause();
-        });
-    },
-
-    // 欢迎页卡片跳转
-    setupWelcomeCards: function() {
-        document.querySelectorAll('.welcome-card').forEach(card => {
-            card.addEventListener('click', () => {
-                const cat = card.dataset.category;
-                const firstExp = document.querySelector(`.category[data-category="${cat}"] .experiment-list li`);
-                if (firstExp) {
-                    this.loadExperiment(firstExp.dataset.exp);
-                }
-            });
-        });
-    },
-
-    // 加载实验
+    // 加载实验（SPA方式）
     loadExperiment: function(expId) {
         const exp = this.experiments[expId];
         if (!exp) {
-            console.warn(`实验 "${expId}" 未找到`);
+            console.warn('实验 "' + expId + '" 未找到，尝试跳转独立页面');
+            window.location.href = 'experiments/' + expId + '.html';
             return;
         }
 
-        // 停止当前实验
         if (this.currentExp) {
             if (this.currentExp.animId) {
                 cancelAnimationFrame(this.currentExp.animId);
@@ -108,34 +81,39 @@ const App = {
 
         this.currentExp = exp;
 
-        // 更新标题
         document.getElementById('exp-title').textContent = exp.title;
         document.getElementById('exp-description').textContent = exp.description || '';
-
-        // 显示暂停按钮（默认）
         document.getElementById('btn-pause').style.display = '';
 
-        // 切换到实验页面
         this.showPage('experiment-container');
 
-        // 高亮导航
         document.querySelectorAll('.experiment-list li').forEach(el => el.classList.remove('active'));
-        const navItem = document.querySelector(`.experiment-list li[data-exp="${expId}"]`);
+        const navItem = document.querySelector('.experiment-list li[data-exp="' + expId + '"]');
         if (navItem) {
             navItem.classList.add('active');
-            // 展开所属分类
             const category = navItem.closest('.category');
             if (category) category.classList.add('open');
         }
 
-        // 初始化实验
         exp.init(this.canvas, this.controlsEl, this.infoEl);
     },
 
     // 页面切换
     showPage: function(pageId) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.getElementById(pageId).classList.add('active');
+        const page = document.getElementById(pageId);
+        if (page) page.classList.add('active');
+    },
+
+    // 窗口缩放
+    setupResize: function() {
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                if (this.currentExp) this.currentExp.resize();
+            }, 200);
+        });
     },
 
     // AI 问答
@@ -160,6 +138,11 @@ const App = {
                 apiStatus.style.color = '#999';
             }
         };
+
+        // 自动保存内置API密钥（若用户尚未自定义）
+        if (!localStorage.getItem('deepseek_api_key')) {
+            DeepSeek.setApiKey('sk-ad3a7f0a19034ea687db9c97f151771f');
+        }
 
         const addMessage = (content, isUser) => {
             const div = document.createElement('div');
@@ -231,16 +214,6 @@ const App = {
         });
     },
 
-    // 窗口缩放
-    setupResize: function() {
-        let resizeTimer;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(() => {
-                if (this.currentExp) this.currentExp.resize();
-            }, 200);
-        });
-    }
 };
 
 // ========== 注册所有实验 ==========

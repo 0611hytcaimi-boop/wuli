@@ -175,17 +175,18 @@ function generateExperimentHTML(exp) {
             return;
         }
 
-        // 修正 pause 按钮的初始文字（各实验的 reset 里会设置）
-        var btn = document.getElementById('btn-pause');
+        try {
+            // 修正 pause 按钮的初始文字（各实验的 reset 里会设置）
+            var btn = document.getElementById('btn-pause');
 
-        // 初始化
-        exp.init(document.getElementById('exp-canvas'),
-                 document.getElementById('controls-container'),
-                 document.getElementById('info-container'));
+            // 初始化
+            exp.init(document.getElementById('exp-canvas'),
+                     document.getElementById('controls-container'),
+                     document.getElementById('info-container'));
 
-        // 绑定按钮
-        document.getElementById('btn-reset').addEventListener('click', function() { exp.reset(); });
-        document.getElementById('btn-pause').addEventListener('click', function() { exp.togglePause(); });
+            // 绑定按钮
+            document.getElementById('btn-reset').addEventListener('click', function() { exp.reset(); });
+            document.getElementById('btn-pause').addEventListener('click', function() { exp.togglePause(); });
 
         // 窗口缩放时重置画布尺寸
         var resizeTimer;
@@ -219,6 +220,13 @@ ${experiments.map(e => `            { id: '${e.id}', title: '${e.title}', cat: '
         });
         navHTML += '</div></div>';
         document.getElementById('exp-controls').insertAdjacentHTML('beforeend', navHTML);
+    } catch (err) {
+        // 显示错误信息到页面
+        var errDiv = document.createElement('div');
+        errDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#c4726e;color:white;padding:16px;z-index:9999;font-size:14px;word-break:break-all;';
+        errDiv.innerHTML = '<strong>JS 错误：</strong>' + err.message + '<br><small>' + (err.stack || '') + '</small>';
+        document.body.appendChild(errDiv);
+    }
     });
     </script>
 </body>
